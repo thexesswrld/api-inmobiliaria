@@ -140,7 +140,23 @@ INSERT INTO gen_pais (nombre) VALUES ('Perú');
 INSERT INTO auth_rol (codigo, nombre, descripcion)
 VALUES ('ADMIN', 'Administrador', 'Acceso total al sistema');
 
+-- Permisos. Cada código debe coincidir con src/common/auth/permisos-banderas.ts
+-- (la API avisa al arrancar si falta alguno). Formato: modulo.entidad.accion
+INSERT INTO auth_permiso (codigo, nombre, modulo) VALUES
+  ('auth.usuario.listar', 'Listar usuarios',      'auth'),
+  ('auth.usuario.ver',    'Ver detalle de usuario', 'auth');
+
+-- ADMIN recibe todos los permisos (se puede volver a ejecutar sin duplicar)
+INSERT INTO auth_rol_permiso (id_rol, id_permiso)
+SELECT r.id, p.id
+FROM auth_rol r CROSS JOIN auth_permiso p
+WHERE r.codigo = 'ADMIN'
+ON CONFLICT (id_rol, id_permiso) DO NOTHING;
+
 COMMIT;
 
 -- Primer usuario: crear su per_persona, luego auth_usuario con el hash
 -- de la contraseña y asignarle el rol ADMIN en auth_usuario_rol.
+-- La API usa bcrypt; desde SQL se puede generar con pgcrypto (en Supabase
+-- viene instalado en el esquema "extensions"):
+--   extensions.crypt('la-contraseña', extensions.gen_salt('bf', 10))

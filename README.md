@@ -25,6 +25,8 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+> 📘 **Guía del proyecto:** [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md): capas de cada módulo, permisos (`@IsPublic`, `@Permisos`), respuestas estándar, Prisma con Supabase y Swagger.
+
 ## Project setup
 
 ```bash

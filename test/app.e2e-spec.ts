@@ -20,7 +20,14 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Hello World!');
+      .expect({ ok: true, data: 'Hello World!' });
+  });
+
+  it('/usuarios (GET) sin token → 401', () => {
+    return request(app.getHttpServer())
+      .get('/usuarios')
+      .expect(401)
+      .expect((res) => expect(res.body).toMatchObject({ ok: false, error: { codigo: 'NO_AUTENTICADO' } }));
   });
 
   afterEach(async () => {
