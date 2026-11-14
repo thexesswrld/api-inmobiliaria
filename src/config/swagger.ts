@@ -3,12 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export const NOMBRE_SEGURIDAD = 'bearer';
 
-/**
- * Documentación en /docs (JSON en /docs-json).
- * - Los cuerpos y query con { schema } de zod se documentan solos.
- * - Todo endpoint pide token salvo los marcados con @IsPublic().
- * - @Permisos(...) muestra los permisos requeridos en la respuesta 403.
- */
+
 export function configurarSwagger(app: INestApplication) {
   const config = new DocumentBuilder()
     .setTitle('API Inmobiliaria')
