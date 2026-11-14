@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Headers, HttpCode, Ip, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { IsPublic, UsuarioActual } from '../../../common/auth/decorators.js';
+import { Cliente, IsPublic, UsuarioActual, type DatosCliente } from '../../../common/auth/decorators.js';
 import type { UsuarioAutenticado } from '../../../common/auth/usuario-autenticado.js';
 import { LoginSchema, type LoginDto } from '../model/dto/login.dto.js';
 import { toUsuarioSesionRespuesta } from '../model/usuario.mapper.js';
@@ -16,12 +16,8 @@ export class AuthController {
   @Post('login')
   @HttpCode(200)
   @ApiOperation({ summary: 'Iniciar sesión', description: 'Devuelve el token JWT y los roles y permisos del usuario.' })
-  login(
-    @Body({ schema: LoginSchema }) dto: LoginDto,
-    @Ip() ip: string,
-    @Headers('user-agent') userAgent?: string,
-  ) {
-    return this.auth.login(dto, { ip, userAgent });
+  login(@Body({ schema: LoginSchema }) dto: LoginDto, @Cliente() cliente: DatosCliente) {
+    return this.auth.login(dto, cliente);
   }
 
   /** POST /auth/logout → cierra la sesión del token usado */

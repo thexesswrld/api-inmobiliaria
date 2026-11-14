@@ -25,7 +25,9 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-> 📘 **Guía del proyecto:** [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md): capas de cada módulo, permisos (`@IsPublic`, `@Permisos`), respuestas estándar, Prisma con Supabase y Swagger.
+>**Guía del proyecto:** [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md): capas de cada módulo, permisos (`@IsPublic`, `@Permisos`), respuestas estándar, Prisma con Supabase y Swagger.
+>
+> **Procesos de negocio:** [docs/procesos-negocio.html](docs/procesos-negocio.html): diagramas de cotizar, separar, pagar, comprobante, formalizar y cerrar una venta (ábrelo en el navegador).
 
 ## Project setup
 

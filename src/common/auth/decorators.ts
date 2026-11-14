@@ -22,6 +22,16 @@ export const Permisos = (...permisos: Permiso[]) =>
     ApiForbiddenResponse({ description: `Requiere los permisos: ${permisos.join(', ')}` }),
   );
 
+export interface DatosCliente {
+  ip?: string;
+  userAgent?: string;
+}
+
+export const Cliente = createParamDecorator((_: unknown, ctx: ExecutionContext): DatosCliente => {
+  const req = ctx.switchToHttp().getRequest<RequestConUsuario>();
+  return { ip: req.ip, userAgent: req.headers['user-agent'] };
+});
+
 /* Inyecta el usuario de la sesión: `perfil(@UsuarioActual() u: UsuarioAutenticado)`. */
 export const UsuarioActual = createParamDecorator(
   (_: unknown, ctx: ExecutionContext): UsuarioAutenticado | undefined =>

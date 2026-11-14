@@ -2,6 +2,8 @@
 
 Guía para crear módulos nuevos y usar bien cada capa, la autenticación, las respuestas estándar, Prisma y Swagger.
 
+> **Procesos de negocio:** los flujos de venta (actores, endpoints, transacciones, triggers y estados) están diagramados en [procesos-negocio.html](procesos-negocio.html). Ábrelo en el navegador.
+
 > **Idea central:** las reglas de negocio importantes viven en **PostgreSQL** (`database/negocio/`: triggers y funciones). La API **no las repite**: recibe la petición, valida la forma de los datos, llama a la base y devuelve una respuesta ordenada.
 
 ---

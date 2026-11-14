@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Copia local del graficador publicado en claude.ai.
+     Ábrelo con doble clic: los diagramas se dibujan con Mermaid (requiere internet). -->
+<title>Procesos de Venta Inmobiliaria</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: plano técnico — índice fijo arriba, cada proceso = diagrama + ficha de la transacción */
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --fg: #18202c;
+  --muted: #5a6575;
+  --line: #dbe1ea;
+  --accent: #2c56c9;
+  --accent-soft: #e7edfb;
+  --ok: #1f7a4d;   --ok-bg: #e3f3ea;
+  --warn: #9a5b00; --warn-bg: #fbefd9;
+  --info: #2c56c9; --info-bg: #e7edfb;
+  --done: #6b3fb0; --done-bg: #efe7fa;
+  --bad: #b3261e;  --bad-bg: #fbe5e3;
+  --off: #55606e;  --off-bg: #e8ebef;
+  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131a; --surface: #151c26; --fg: #e5e9ef; --muted: #9aa5b4; --line: #263142;
+    --accent: #86a6ff; --accent-soft: #1c2840;
+    --ok: #6fd1a0; --ok-bg: #12301f; --warn: #f0b85a; --warn-bg: #33260f;
+    --info: #86a6ff; --info-bg: #1c2840; --done: #c3a1f5; --done-bg: #2a1d40;
+    --bad: #f28b82; --bad-bg: #3a1716; --off: #a7b0bc; --off-bg: #232b36;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131a; --surface: #151c26; --fg: #e5e9ef; --muted: #9aa5b4; --line: #263142;
+  --accent: #86a6ff; --accent-soft: #1c2840;
+  --ok: #6fd1a0; --ok-bg: #12301f; --warn: #f0b85a; --warn-bg: #33260f;
+  --info: #86a6ff; --info-bg: #1c2840; --done: #c3a1f5; --done-bg: #2a1d40;
+  --bad: #f28b82; --bad-bg: #3a1716; --off: #a7b0bc; --off-bg: #232b36;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.55;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--surface);
+}
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+code { background: var(--accent-soft); color: var(--fg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Cabecera */
+header.top { padding-block: 36px 20px; display: grid; gap: 14px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+header.top h1 { font-size: clamp(28px, 4.2vw, 42px); line-height: 1.1; }
+header.top p { max-width: 70ch; color: var(--muted); margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Índice fijo */
+nav.idx {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+nav.idx .wrap { display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; scrollbar-width: thin; }
+nav.idx a {
+  flex: none; text-decoration: none; color: var(--fg); font-size: 13px; font-weight: 500;
+  padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface);
+}
+nav.idx a:hover { border-color: var(--accent); color: var(--accent); }
+nav.idx a .n { font-family: var(--f-mono); color: var(--muted); margin-right: 6px; font-size: 12px; }
+
+/* Secciones */
+main { display: grid; gap: 28px; padding-block: 28px 64px; }
+section.proc { scroll-margin-top: 70px; display: grid; gap: 16px; }
+.proc-head { display: grid; gap: 6px; }
+.proc-head .step { font-family: var(--f-mono); font-size: 12px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; }
+.proc-head h2 { font-size: 26px; }
+.proc-head p { margin: 0; color: var(--muted); max-width: 75ch; }
+
+.proc-body { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .proc-body { grid-template-columns: minmax(0, 1fr); } }
+
+.diagram {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px; overflow-x: auto; min-width: 0;
+}
+.diagram pre.mermaid { margin: 0; background: transparent; font-family: var(--f-body); min-width: 560px; }
+.diagram.state pre.mermaid { min-width: 0; }
+
+/* Ficha de la transacción */
+.ficha { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; min-width: 0; }
+.ficha h3 { font-size: 14px; font-family: var(--f-mono); font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--muted); padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.ficha dl { margin: 0; display: grid; }
+.ficha .row { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; padding: 11px 16px; border-bottom: 1px solid var(--line); }
+.ficha .row:last-child { border-bottom: 0; }
+.ficha dt { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
+.ficha dd { margin: 0; min-width: 0; font-size: 14px; }
+.ficha ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.ficha .err li { color: var(--fg); }
+.ficha .err li::marker { color: var(--bad); }
+
+.ep { display: grid; gap: 4px; }
+.ep div { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.verb { font-family: var(--f-mono); font-size: 11px; font-weight: 500; padding: 1px 6px; border-radius: 4px; flex: none; }
+.verb.get { background: var(--ok-bg); color: var(--ok); }
+.verb.post { background: var(--info-bg); color: var(--info); }
+.verb.patch { background: var(--warn-bg); color: var(--warn); }
+.verb.fn { background: var(--done-bg); color: var(--done); }
+.path { font-family: var(--f-mono); font-size: 13px; overflow-wrap: anywhere; }
+
+/* Chips de estado */
+.chip { display: inline-block; font-family: var(--f-mono); font-size: 11.5px; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+.chip.ok { background: var(--ok-bg); color: var(--ok); }
+.chip.warn { background: var(--warn-bg); color: var(--warn); }
+.chip.info { background: var(--info-bg); color: var(--info); }
+.chip.done { background: var(--done-bg); color: var(--done); }
+.chip.bad { background: var(--bad-bg); color: var(--bad); }
+.chip.off { background: var(--off-bg); color: var(--off); }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.flow .arr { color: var(--muted); font-size: 12px; }
+
+.tag-prop { font-size: 11px; font-family: var(--f-mono); color: var(--warn); background: var(--warn-bg); padding: 1px 6px; border-radius: 4px; }
+.tag-bd { font-size: 11px; font-family: var(--f-mono); color: var(--ok); background: var(--ok-bg); padding: 1px 6px; border-radius: 4px; }
+
+/* Estados */
+.states { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+.states .diagram h3 { font-size: 16px; margin-bottom: 4px; }
+.states .diagram p { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+.states .diagram p code { font-size: 0.82em; }
+
+/* Pendientes */
+.gaps { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.gaps .g { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 16px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.gaps .g:last-child { border-bottom: 0; }
+.gaps .g h3 { font-size: 15px; font-family: var(--f-body); font-weight: 600; }
+.gaps .g p { margin: 0; color: var(--muted); font-size: 14px; }
+@media (max-width: 700px) { .gaps .g { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+
+footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<header class="top wrap">
+  <div class="eyebrow">api-inmobiliaria · procesos de negocio</div>
+  <h1>Cómo se mueve una venta, de la cotización a la entrega</h1>
+  <p>Cada proceso muestra quién lo inicia, qué endpoint llama, qué hace la transacción en la base de datos, qué triggers se disparan y qué estados cambian. Las reglas y los mensajes de error salen de <code>database/negocio/</code>.</p>
+  <div class="legend">
+    <span><span class="tag-bd">BD</span> ya existe en la base de datos (tabla, trigger o función)</span>
+    <span><span class="tag-prop">propuesto</span> endpoint sugerido, aún no implementado en la API</span>
+  </div>
+</header>
+
+<nav class="idx" aria-label="Procesos">
+  <div class="wrap">
+    <a href="#mapa"><span class="n">00</span>Mapa general</a>
+    <a href="#cotizar"><span class="n">01</span>Cotizar</a>
+    <a href="#separar"><span class="n">02</span>Separar unidad</a>
+    <a href="#pagar"><span class="n">03</span>Registrar pago</a>
+    <a href="#validar"><span class="n">04</span>Validar o anular pago</a>
+    <a href="#comprobante"><span class="n">05</span>Emitir comprobante</a>
+    <a href="#formalizar"><span class="n">06</span>Formalizar contrato</a>
+    <a href="#cierre"><span class="n">07</span>Cerrar, entregar o anular</a>
+    <a href="#vencidas"><span class="n">08</span>Cuotas vencidas</a>
+    <a href="#estados">Estados</a>
+    <a href="#pendientes">Pendientes</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- 00 MAPA -->
+<section class="proc" id="mapa">
+  <div class="proc-head">
+    <div class="step">00 · Vista completa</div>
+    <h2>Mapa general del ciclo de venta</h2>
+    <p>El camino normal va de izquierda a derecha. El pago se repite por cada cuota. Desde una venta separada o vigente se puede salir por anulación o resolución, y la unidad vuelve a quedar disponible.</p>
+  </div>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  A["01 Cotizar&lt;br/&gt;Asesor + Cliente&lt;br/&gt;solo consulta"] --> B["02 Separar unidad&lt;br/&gt;venta SEPARADA&lt;br/&gt;unidad SEPARADO"]
+  B --> C["03 Pago de separación&lt;br/&gt;Caja"]
+  C --> D["04 Validar pago&lt;br/&gt;Administración"]
+  D --> E["05 Comprobante&lt;br/&gt;boleta o factura"]
+  B --> F["06 Formalizar contrato&lt;br/&gt;venta VIGENTE&lt;br/&gt;unidad VENDIDO&lt;br/&gt;cronograma"]
+  F --> G["03 a 05 Pago de cuotas&lt;br/&gt;se repite cada mes"]
+  G --> G
+  G --> H["07 Cancelar&lt;br/&gt;saldo 0, venta CANCELADA&lt;br/&gt;cliente es propietario"]
+  H --> I["07 Entregar&lt;br/&gt;venta ENTREGADA&lt;br/&gt;unidad ENTREGADO"]
+  B -. desiste .-> X["07 Anular o resolver&lt;br/&gt;unidad DISPONIBLE"]
+  F -. incumple .-> X
+  J["08 Job diario"] -. marca VENCIDA .-> G
+</pre>
+  </div>
+</section>
+
+<!-- 01 COTIZAR -->
+<section class="proc" id="cotizar">
+  <div class="proc-head">
+    <div class="step">01 · Solo lectura</div>
+    <h2>Cotizar</h2>
+    <p>El cliente pide precios. El asesor recorre proyecto, sectores y unidades disponibles, muestra el plano con las zonas clicables y simula el cronograma. Nada se guarda: no hay transacción.</p>
+  </div>
+  <div class="proc-body">
+    <div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor C as Cliente
+  actor AS as Asesor
+  participant API
+  participant BD as Base de datos
+  C->>AS: Pide cotizar un lote o departamento
+  AS->>API: GET /proyectos
+  API->>BD: SELECT pro_proyecto activos
+  API-->>AS: Lista de proyectos
+  AS->>API: GET /proyectos/:id/sectores
+  API->>BD: SELECT pro_sector en árbol
+  API-->>AS: Etapas, manzanas, torres, pisos
+  AS->>API: GET /unidades?sector=12&amp;estado=DISPONIBLE
+  API->>BD: SELECT pro_unidad con estado_comercial
+  API-->>AS: Unidades con precio, áreas y atributos
+  AS->>API: GET /proyectos/:id/modelos
+  API->>BD: SELECT pro_modelo y pro_modelo_referencia
+  API-->>AS: Plano o render con zonas clicables por unidad
+  AS->>API: POST /cotizaciones/simular
+  Note over API: logic de cronograma&lt;br/&gt;precio - descuento, inicial, financiado, cuotas&lt;br/&gt;no escribe en la BD
+  API-->>AS: Cronograma simulado
+  AS-->>C: Entrega la cotización
+</pre>
+    </div>
+    <div class="ficha">
+      <h3>Ficha del proceso</h3>
+      <dl>
+        <div class="row"><dt>Actores</dt><dd>Cliente, Asesor de ventas</dd></div>
+        <div class="row"><dt>Endpoints</dt><dd class="ep">
+          <div><span class="verb get">GET</span><span class="path">/proyectos</span> <span class="tag-prop">propuesto</span></div>
+          <div><span class="verb get">GET</span><span class="path">/proyectos/:id/sectores</span></div>
+          <div><span class="verb get">GET</span><span class="path">/unidades?estado=DISPONIBLE</span></div>
+          <div><span class="verb get">GET</span><span class="path">/proyectos/:id/modelos</span></div>
+          <div><span class="verb post">POST</span><span class="path">/cotizaciones/simular</span></div>
+        </dd></div>
+        <div class="row"><dt>Permisos</dt><dd><code>pro.unidad.listar</code>, <code>ven.cotizacion.simular</code></dd></div>
+        <div class="row"><dt>Lee</dt><dd><code>pro_proyecto</code>, <code>pro_sector</code>, <code>pro_unidad</code>, <code>pro_modelo</code>, <code>pro_modelo_referencia</code></dd></div>
+        <div class="row"><dt>Escribe</dt><dd>Nada</dd></div>
+        <div class="row"><dt>Estados</dt><dd>No cambia ninguno. Solo se muestran unidades <span class="chip ok">DISPONIBLE</span></dd></div>
+        <div class="row"><dt>Retorna</dt><dd>Listas paginadas <code>{ ok, data, meta }</code> y el cronograma simulado</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- 02 SEPARAR -->
+<section class="proc" id="separar">
+  <div class="proc-head">
+    <div class="step">02 · Transacción</div>
+    <h2>Separar la unidad</h2>
+    <p>El cliente elige la unidad. Se crea la venta en estado <span class="chip warn">SEPARADA</span> con sus unidades y la cuota de separación. La base de datos bloquea la unidad y la pasa a <span class="chip warn">SEPARADO</span> sola, dentro de la misma transacción.</p>
+  </div>
+  <div class="proc-body">
+    <div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor C as Cliente
+  actor AS as Asesor
+  participant API
+  participant BD as Base de datos
+  C->>AS: Elige la unidad y acepta separarla
+  AS->>API: POST /ventas con cliente, unidades y monto de separación
+  Note over API: Valida el DTO con zod&lt;br/&gt;Permiso ven.venta.separar
+  critical prisma.$transaction
+    API->>BD: INSERT ven_venta, estado_comercial SEPARADA
+    API->>BD: INSERT ven_detalle_venta, una fila por unidad
+    Note over BD: trigger trg_detalle_venta_sync&lt;br/&gt;fn_sincronizar_unidades_venta
+    BD->>BD: Bloquea la unidad con FOR UPDATE
+    BD->>BD: ¿Otra venta activa la ocupa? ¿Está BLOQUEADA?
+    BD->>BD: UPDATE pro_unidad a SEPARADO
+    API->>BD: INSERT ven_cuota tipo SEPARACION, PENDIENTE
+  option La unidad ya está comprometida o bloqueada
+    BD-->>API: RAISE EXCEPTION, se revierte todo
+    API-->>AS: 422 REGLA_NEGOCIO con el mensaje
+  end
+  API-->>AS: 201 venta SEPARADA y su cuota de separación
+  AS-->>C: Constancia de separación
+</pre>
+    </div>
+    <div class="ficha">
+      <h3>Ficha del proceso</h3>
+      <dl>
+        <div class="row"><dt>Actores</dt><dd>Asesor de ventas (registra), Cliente</dd></div>
+        <div class="row"><dt>Endpoint</dt><dd class="ep">
+          <div><span class="verb post">POST</span><span class="path">/ventas</span> <span class="tag-prop">propuesto</span></div>
+        </dd></div>
+        <div class="row"><dt>Permiso</dt><dd><code>ven.venta.separar</code></dd></div>
+        <div class="row"><dt>Escribe</dt><dd><code>ven_venta</code>, <code>ven_detalle_venta</code>, <code>ven_cuota</code></dd></div>
+        <div class="row"><dt>Trigger</dt><dd><span class="tag-bd">BD</span> <code>trg_detalle_venta_sync</code> → <code>fn_sincronizar_unidades_venta</code></dd></div>
+        <div class="row"><dt>Estados</dt><dd class="flow">
+          <span>Venta:</span><span class="chip warn">SEPARADA</span>
+          <span style="width:100%"></span>
+          <span>Unidad:</span><span class="chip ok">DISPONIBLE</span><span class="arr">→</span><span class="chip warn">SEPARADO</span>
+          <span style="width:100%"></span>
+          <span>Cuota:</span><span class="chip off">PENDIENTE</span>
+        </dd></div>
+        <div class="row"><dt>Errores</dt><dd><ul class="err">
+          <li>La unidad "Mz A Lt 5" ya está comprometida en la venta V-0012</li>
+          <li>La unidad "Mz A Lt 5" está BLOQUEADA y no se puede vender</li>
+        </ul></dd></div>
+        <div class="row"><dt>Concurrencia</dt><dd>Si dos asesores separan la misma unidad a la vez, el bloqueo los atiende en fila: el segundo recibe el error de unidad comprometida.</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- 03 PAGAR -->
+<section class="proc" id="pagar">
+  <div class="proc-head">
+    <div class="step">03 · Transacción</div>
+    <h2>Registrar un pago</h2>
+    <p>Caja registra el dinero recibido y lo reparte entre una o varias cuotas, a capital o a mora. La base de datos valida los topes y recalcula cada cuota.</p>
+  </div>
+  <div class="proc-body">
+    <div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor C as Cliente
+  actor CJ as Caja
+  participant API
+  participant BD as Base de datos
+  C->>CJ: Paga en efectivo, transferencia o Yape
+  CJ->>API: POST /ventas/:id/pagos con monto, medio y reparto por cuota
+  critical prisma.$transaction
+    API->>BD: INSERT ven_pago, estado_pago REGISTRADO
+    Note over BD: trg_pago_validar&lt;br/&gt;otra moneda exige tipo_cambio
+    API->>BD: INSERT ven_pago_aplicacion por cada cuota, CAPITAL o MORA
+    Note over BD: trg_aplicacion_llenar_venta&lt;br/&gt;trg_pago_aplicacion_cuota
+    BD->>BD: Bloquea el pago y suma lo aplicado
+    BD->>BD: fn_recalcular_monto_pagado de cada cuota
+    BD->>BD: UPDATE ven_cuota monto_pagado y estado
+  option Se reparte más de lo pagado o más de lo que vale la cuota
+    BD-->>API: RAISE EXCEPTION, se revierte todo
+    API-->>CJ: 422 REGLA_NEGOCIO
+  end
+  API-->>CJ: 201 pago REGISTRADO y cuotas actualizadas
+  CJ-->>C: Constancia de pago
+</pre>
+    </div>
+    <div class="ficha">
+      <h3>Ficha del proceso</h3>
+      <dl>
+        <div class="row"><dt>Actores</dt><dd>Caja o Cobranzas, Cliente</dd></div>
+        <div class="row"><dt>Endpoint</dt><dd class="ep">
+          <div><span class="verb post">POST</span><span class="path">/ventas/:id/pagos</span> <span class="tag-prop">propuesto</span></div>
+        </dd></div>
+        <div class="row"><dt>Permiso</dt><dd><code>ven.pago.registrar</code></dd></div>
+        <div class="row"><dt>Escribe</dt><dd><code>ven_pago</code>, <code>ven_pago_aplicacion</code>. <code>ven_cuota</code> la actualiza el trigger</dd></div>
+        <div class="row"><dt>Triggers</dt><dd><span class="tag-bd">BD</span> <code>trg_pago_validar</code>, <code>trg_aplicacion_llenar_venta</code>, <code>trg_pago_aplicacion_cuota</code></dd></div>
+        <div class="row"><dt>Estados</dt><dd class="flow">
+          <span>Pago:</span><span class="chip off">REGISTRADO</span>
+          <span style="width:100%"></span>
+          <span>Cuota:</span><span class="chip off">PENDIENTE</span><span class="arr">→</span><span class="chip warn">PAGO_PARCIAL</span><span class="arr">→</span><span class="chip ok">PAGADA</span>
+        </dd></div>
+        <div class="row"><dt>Errores</dt><dd><ul class="err">
+          <li>El pago está en otra moneda que la venta: tipo_cambio es obligatorio</li>
+          <li>El pago 88 es de 500.00 y se estarían aplicando 650.00</li>
+          <li>La cuota 3 de la venta 12 vale 1200.00 y se le estaría aplicando 1500.00 a capital</li>
+          <li>La cuota 3 de la venta 12 está ANULADA y no puede recibir pagos</li>
+        </ul></dd></div>
+        <div class="row"><dt>Nota</dt><dd>La cuota cuenta pagos <span class="chip off">REGISTRADO</span> y <span class="chip ok">VALIDADO</span>. El IGV no va aquí: va en el comprobante.</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- 04 VALIDAR -->
+<section class="proc" id="validar">
+  <div class="proc-head">
+    <div class="step">04 · Transacción</div>
+    <h2>Validar, rechazar o anular un pago</h2>
+    <p>Administración confirma que el dinero llegó, o lo rechaza o anula con un motivo. Si el pago deja de contar, sus cuotas se recalculan solas.</p>
+  </div>
+  <div class="proc-body">
+    <div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor AD as Administración
+  participant API
+  participant BD as Base de datos
+  AD->>API: PATCH /pagos/:id/estado con VALIDADO, RECHAZADO o ANULADO
+  critical prisma.$transaction
+    API->>BD: UPDATE ven_pago estado_pago y motivo_anulacion
+    Note over BD: trg_pago_validar&lt;br/&gt;RECHAZADO o ANULADO exige motivo&lt;br/&gt;un pago ANULADO no se reactiva
+    Note over BD: trg_pago_estado
+    BD->>BD: fn_recalcular_monto_pagado de cada cuota del pago
+    BD->>BD: Si se anuló, la cuota vuelve a PENDIENTE, PAGO_PARCIAL o VENCIDA
+  option Falta motivo o se intenta reactivar
+    BD-->>API: RAISE EXCEPTION
+    API-->>AD: 422 REGLA_NEGOCIO
+  end
+  API-->>AD: Pago con su nuevo estado
+</pre>
+    </div>
+    <div class="ficha">
+      <h3>Ficha del proceso</h3>
+      <dl>
+        <div class="row"><dt>Actores</dt><dd>Administración</dd></div>
+        <div class="row"><dt>Endpoint</dt><dd class="ep">
+          <div><span class="verb patch">PATCH</span><span class="path">/pagos/:id/estado</span> <span class="tag-prop">propuesto</span></div>
+        </dd></div>
+        <div class="row"><dt>Permisos</dt><dd><code>ven.pago.validar</code>, <code>ven.pago.anular</code></dd></div>
+        <div class="row"><dt>Escribe</dt><dd><code>ven_pago</code>. Las cuotas las recalcula el trigger</dd></div>
+        <div class="row"><dt>Triggers</dt><dd><span class="tag-bd">BD</span> <code>trg_pago_validar</code>, <code>trg_pago_estado</code></dd></div>
+        <div class="row"><dt>Estados</dt><dd class="flow">
+          <span class="chip off">REGISTRADO</span><span class="arr">→</span><span class="chip ok">VALIDADO</span>
+          <span class="arr">o</span><span class="chip bad">RECHAZADO</span>
+          <span class="arr">o</span><span class="chip bad">ANULADO</span>
+        </dd></div>
+        <div class="row"><dt>Errores</dt><dd><ul class="err">
+          <li>Indique motivo_anulacion para marcar el pago como ANULADO</li>
+          <li>El pago 88 está ANULADO y no se puede reactivar: registre un pago nuevo</li>
+          <li>El pago 88 ya está VALIDADO: no se cambia monto, venta, moneda ni fecha</li>
+          <li>El pago 88 ya fue procesado: no se elimina, se anula con motivo</li>
+        </ul></dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- 05 COMPROBANTE -->
+<section class="proc" id="comprobante">
+  <div class="proc-head">
+    <div class="step">05 · Transacción + envío aparte</div>
+    <h2>Emitir el comprobante</h2>
+    <p>Por cada pago se emite una boleta (03) o factura (01). El número sale de la serie de forma segura, y una vez emitido el comprobante no se modifica: solo se anula o se corrige con nota de crédito.</p>
+  </div>
+  <div class="proc-body">
+    <div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor AD as Administración
+  participant API
+  participant BD as Base de datos
+  participant S as SUNAT u OSE
+  AD->>API: POST /pagos/:id/comprobante con tipo y serie
+  Note over API: Calcula op_gravada, IGV 18 por ciento y total&lt;br/&gt;copia documento, nombre y dirección del cliente
+  critical prisma.$transaction
+    API->>BD: SELECT fn_siguiente_numero_comprobante del id_serie
+    Note over BD: Bloquea ven_serie&lt;br/&gt;nunca se repite un número
+    BD-->>API: 124
+    API->>BD: INSERT ven_comprobante EMITIDO, SUNAT PENDIENTE
+  end
+  API-->>AD: Comprobante B001-00000124
+  API->>S: Envía el XML firmado, proceso aparte
+  S-->>API: CDR con ACEPTADO, OBSERVADO o RECHAZADO
+  API->>BD: UPDATE estado_sunat, hash_cpe, url_xml, url_cdr
+  Note over BD: trg_comprobante_inmutable&lt;br/&gt;solo cambian estado, datos SUNAT y archivos
+</pre>
+    </div>
+    <div class="ficha">
+      <h3>Ficha del proceso</h3>
+      <dl>
+        <div class="row"><dt>Actores</dt><dd>Administración, SUNAT u OSE</dd></div>
+        <div class="row"><dt>Endpoints</dt><dd class="ep">
+          <div><span class="verb post">POST</span><span class="path">/pagos/:id/comprobante</span> <span class="tag-prop">propuesto</span></div>
+          <div><span class="verb patch">PATCH</span><span class="path">/comprobantes/:id/anular</span></div>
+          <div><span class="verb fn">FN</span><span class="path">fn_siguiente_numero_comprobante</span> <span class="tag-bd">BD</span></div>
+        </dd></div>
+        <div class="row"><dt>Permisos</dt><dd><code>ven.comprobante.emitir</code>, <code>ven.comprobante.anular</code></dd></div>
+        <div class="row"><dt>Escribe</dt><dd><code>ven_serie</code> (correlativo), <code>ven_comprobante</code></dd></div>
+        <div class="row"><dt>Trigger</dt><dd><span class="tag-bd">BD</span> <code>trg_comprobante_inmutable</code></dd></div>
+        <div class="row"><dt>Estados</dt><dd class="flow">
+          <span>Comprobante:</span><span class="chip ok">EMITIDO</span><span class="arr">→</span><span class="chip bad">ANULADO</span>
+          <span style="width:100%"></span>
+          <span>SUNAT:</span><span class="chip off">PENDIENTE</span><span class="arr">→</span><span class="chip info">ENVIADO</span><span class="arr">→</span><span class="chip ok">ACEPTADO</span>
+        </dd></div>
+        <div class="row"><dt>Errores</dt><dd><ul class="err">
+          <li>La serie 3 no existe o está inactiva</li>
+          <li>El comprobante B001-00000124 ya fue emitido: solo se puede cambiar su estado, datos SUNAT, archivos y observaciones</li>
+          <li>El comprobante B001-00000124 no se elimina: anúlelo o emita una nota de crédito</li>
+          <li>Indique motivo_anulacion para anular el comprobante B001-00000124</li>
+        </ul></dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- 06 FORMALIZAR -->
+<section class="proc" id="formalizar">
+  <div class="proc-head">
+    <div class="step">06 · Transacción</div>
+    <h2>Formalizar el contrato</h2>
+    <p>Con la separación pagada, se fijan precio final, inicial y número de cuotas. La venta pasa a <span class="chip info">VIGENTE</span>, la unidad a <span class="chip info">VENDIDO</span> y se crea el cronograma.</p>
+  </div>
+  <div class="proc-body">
+    <div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor C as Cliente
+  actor JV as Jefe de ventas
+  participant API
+  participant BD as Base de datos
+  C->>JV: Firma el contrato
+  JV->>API: PATCH /ventas/:id/formalizar con precio, descuento, inicial y cuotas
+  Note over API: logic de cronograma&lt;br/&gt;monto_final = bruto - descuento&lt;br/&gt;financiado = final - inicial
+  critical prisma.$transaction
+    API->>BD: UPDATE ven_venta montos y estado_comercial VIGENTE
+    Note over BD: trigger trg_venta_unidades
+    BD->>BD: UPDATE pro_unidad a VENDIDO
+    API->>BD: INSERT ven_cuota INICIAL y MENSUAL 1 a n, PENDIENTE
+  option Montos que no cuadran
+    BD-->>API: CHECK ck_venta_monto_final
+    API-->>JV: 422 REGLA_NEGOCIO
+  end
+  API-->>JV: Contrato VIGENTE con su cronograma
+  Note over API,BD: Control: v_venta_resumen&lt;br/&gt;diferencia_inicial y diferencia_cronograma deben ser 0
+</pre>
+    </div>
+    <div class="ficha">
+      <h3>Ficha del proceso</h3>
+      <dl>
+        <div class="row"><dt>Actores</dt><dd>Jefe de ventas, Cliente</dd></div>
+        <div class="row"><dt>Endpoint</dt><dd class="ep">
+          <div><span class="verb patch">PATCH</span><span class="path">/ventas/:id/formalizar</span> <span class="tag-prop">propuesto</span></div>
+        </dd></div>
+        <div class="row"><dt>Permiso</dt><dd><code>ven.venta.formalizar</code></dd></div>
+        <div class="row"><dt>Escribe</dt><dd><code>ven_venta</code>, <code>ven_cuota</code>. <code>pro_unidad</code> la actualiza el trigger</dd></div>
+        <div class="row"><dt>Trigger</dt><dd><span class="tag-bd">BD</span> <code>trg_venta_unidades</code> → <code>fn_sincronizar_unidades_venta</code></dd></div>
+        <div class="row"><dt>Estados</dt><dd class="flow">
+          <span>Venta:</span><span class="chip warn">SEPARADA</span><span class="arr">→</span><span class="chip info">VIGENTE</span>
+          <span style="width:100%"></span>
+          <span>Unidad:</span><span class="chip warn">SEPARADO</span><span class="arr">→</span><span class="chip info">VENDIDO</span>
+        </dd></div>
+        <div class="row"><dt>Lógica API</dt><dd>Cálculo del cronograma en <code>logic/</code>: la base de datos no lo genera, solo lo guarda.</dd></div>
+        <div class="row"><dt>Venta directa</dt><dd>Si no hubo separación, <code>POST /ventas</code> puede crear la venta ya en <span class="chip info">VIGENTE</span>: la unidad pasa de <span class="chip ok">DISPONIBLE</span> a <span class="chip info">VENDIDO</span>.</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- 07 CIERRE -->
+<section class="proc" id="cierre">
+  <div class="proc-head">
+    <div class="step">07 · Transacción</div>
+    <h2>Cancelar, entregar, anular o resolver</h2>
+    <p>Todos son un cambio de estado de la venta. El trigger lleva el estado a las unidades. Marcar <span class="chip ok">CANCELADA</span> lo decide la API después de revisar que el saldo sea 0.</p>
+  </div>
+  <div class="proc-body">
+    <div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor AD as Administración
+  participant API
+  participant BD as Base de datos
+  AD->>API: PATCH /ventas/:id/estado con CANCELADA
+  API->>BD: SELECT saldo de v_venta_resumen
+  alt saldo mayor a 0
+    API-->>AD: 422 la venta tiene saldo pendiente
+  else saldo igual a 0
+    API->>BD: UPDATE ven_venta a CANCELADA
+    Note over BD: trg_venta_unidades
+    BD->>BD: Unidad VENDIDO, id_propietario = cliente
+    API-->>AD: Venta CANCELADA
+  end
+  AD->>API: PATCH /ventas/:id/estado con ENTREGADA
+  API->>BD: UPDATE ven_venta a ENTREGADA
+  BD->>BD: Unidad ENTREGADO
+  AD->>API: PATCH /ventas/:id/estado con ANULADA o RESUELTA
+  critical prisma.$transaction
+    API->>BD: UPDATE ven_venta a ANULADA o RESUELTA
+    BD->>BD: fn_liberar_unidad: DISPONIBLE, sin propietario
+    API->>BD: UPDATE ven_cuota pendientes a ANULADA
+  end
+  API-->>AD: Venta cerrada y unidad liberada
+</pre>
+    </div>
+    <div class="ficha">
+      <h3>Ficha del proceso</h3>
+      <dl>
+        <div class="row"><dt>Actores</dt><dd>Administración, Gerencia</dd></div>
+        <div class="row"><dt>Endpoint</dt><dd class="ep">
+          <div><span class="verb patch">PATCH</span><span class="path">/ventas/:id/estado</span> <span class="tag-prop">propuesto</span></div>
+        </dd></div>
+        <div class="row"><dt>Permisos</dt><dd><code>ven.venta.cerrar</code>, <code>ven.venta.anular</code></dd></div>
+        <div class="row"><dt>Lee</dt><dd><span class="tag-bd">BD</span> <code>v_venta_resumen</code> (saldo, total_pagado)</dd></div>
+        <div class="row"><dt>Trigger</dt><dd><span class="tag-bd">BD</span> <code>trg_venta_unidades</code>, <code>fn_liberar_unidad</code></dd></div>
+        <div class="row"><dt>Estados</dt><dd class="flow">
+          <span class="chip info">VIGENTE</span><span class="arr">→</span><span class="chip ok">CANCELADA</span><span class="arr">→</span><span class="chip done">ENTREGADA</span>
+          <span style="width:100%"></span>
+          <span class="chip warn">SEPARADA</span><span class="arr">/</span><span class="chip info">VIGENTE</span><span class="arr">→</span><span class="chip bad">ANULADA</span><span class="arr">o</span><span class="chip bad">RESUELTA</span>
+        </dd></div>
+        <div class="row"><dt>Unidad</dt><dd class="flow">
+          <span>CANCELADA:</span><span class="chip info">VENDIDO</span><span>+ propietario</span>
+          <span style="width:100%"></span>
+          <span>ENTREGADA:</span><span class="chip done">ENTREGADO</span>
+          <span style="width:100%"></span>
+          <span>ANULADA o RESUELTA:</span><span class="chip ok">DISPONIBLE</span>
+        </dd></div>
+        <div class="row"><dt>Ojo</dt><dd>Una unidad <span class="chip off">BLOQUEADO</span> no se libera sola. Las cuotas pendientes no se anulan por trigger: lo hace la API.</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- 08 VENCIDAS -->
+<section class="proc" id="vencidas">
+  <div class="proc-head">
+    <div class="step">08 · Tarea programada</div>
+    <h2>Marcar cuotas vencidas</h2>
+    <p>Una vez al día, las cuotas impagas con fecha pasada pasan a <span class="chip bad">VENCIDA</span>. No lo inicia ninguna persona: lo dispara un job.</p>
+  </div>
+  <div class="proc-body">
+    <div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant J as Job diario de la API
+  participant BD as Base de datos
+  actor CB as Cobranzas
+  participant API
+  J->>BD: SELECT fn_marcar_cuotas_vencidas
+  BD->>BD: PENDIENTE o PAGO_PARCIAL con fecha pasada a VENCIDA
+  BD-->>J: Cantidad de cuotas marcadas
+  CB->>API: GET /cuotas?estado=VENCIDA
+  API->>BD: SELECT v_cuota_estado
+  BD-->>API: saldo, dias_atraso, mora_pendiente
+  API-->>CB: Lista para gestionar la cobranza
+</pre>
+    </div>
+    <div class="ficha">
+      <h3>Ficha del proceso</h3>
+      <dl>
+        <div class="row"><dt>Actores</dt><dd>Sistema (job), Cobranzas</dd></div>
+        <div class="row"><dt>Disparo</dt><dd><code>@nestjs/schedule</code> con un cron diario, o <code>pg_cron</code> en Supabase</dd></div>
+        <div class="row"><dt>Función</dt><dd class="ep">
+          <div><span class="verb fn">FN</span><span class="path">fn_marcar_cuotas_vencidas()</span> <span class="tag-bd">BD</span></div>
+          <div><span class="verb get">GET</span><span class="path">/cuotas?estado=VENCIDA</span> <span class="tag-prop">propuesto</span></div>
+        </dd></div>
+        <div class="row"><dt>Permiso</dt><dd><code>ven.cuota.listar</code></dd></div>
+        <div class="row"><dt>Estados</dt><dd class="flow">
+          <span class="chip off">PENDIENTE</span><span class="arr">/</span><span class="chip warn">PAGO_PARCIAL</span><span class="arr">→</span><span class="chip bad">VENCIDA</span>
+        </dd></div>
+        <div class="row"><dt>Retorna</dt><dd>Número de cuotas marcadas. La vista <code>v_cuota_estado</code> calcula atraso y mora a la fecha.</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ESTADOS -->
+<section class="proc" id="estados">
+  <div class="proc-head">
+    <div class="step">Referencia</div>
+    <h2>Máquinas de estado</h2>
+    <p>Los estados son opciones de <code>gen_listas_de_opciones</code>. La API trabaja con el <code>codigo</code> (por ejemplo <code>VENDIDO</code>), nunca con el id numérico.</p>
+  </div>
+  <div class="states">
+    <div class="diagram state">
+      <h3>Unidad</h3>
+      <p><code>pro_unidad.estado_comercial</code> · lo cambia el trigger, no la API</p>
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> DISPONIBLE
+  DISPONIBLE --> SEPARADO : venta SEPARADA
+  DISPONIBLE --> VENDIDO : venta directa VIGENTE
+  SEPARADO --> VENDIDO : venta VIGENTE
+  VENDIDO --> ENTREGADO : venta ENTREGADA
+  SEPARADO --> DISPONIBLE : venta ANULADA
+  VENDIDO --> DISPONIBLE : venta RESUELTA
+  DISPONIBLE --> BLOQUEADO : manual
+  BLOQUEADO --> DISPONIBLE : manual
+</pre>
+    </div>
+    <div class="diagram state">
+      <h3>Venta</h3>
+      <p><code>ven_venta.estado_comercial</code> · lo cambia la API</p>
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> SEPARADA : separar
+  [*] --> VIGENTE : venta directa
+  SEPARADA --> VIGENTE : formalizar
+  VIGENTE --> CANCELADA : saldo 0
+  CANCELADA --> ENTREGADA : entrega
+  SEPARADA --> ANULADA : desiste
+  VIGENTE --> RESUELTA : incumple
+  ENTREGADA --> [*]
+  ANULADA --> [*]
+  RESUELTA --> [*]
+</pre>
+    </div>
+    <div class="diagram state">
+      <h3>Cuota</h3>
+      <p><code>ven_cuota.estado_cuota</code> · la recalcula el trigger con cada pago</p>
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> PENDIENTE
+  PENDIENTE --> PAGO_PARCIAL : pago menor
+  PENDIENTE --> PAGADA : pago completo
+  PAGO_PARCIAL --> PAGADA : completa
+  PENDIENTE --> VENCIDA : job diario
+  PAGO_PARCIAL --> VENCIDA : job diario
+  VENCIDA --> PAGADA : paga
+  PAGADA --> PENDIENTE : se anula el pago
+  PENDIENTE --> ANULADA : venta anulada
+</pre>
+    </div>
+    <div class="diagram state">
+      <h3>Pago</h3>
+      <p><code>ven_pago.estado_pago</code> · anular o rechazar exige motivo</p>
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> REGISTRADO : caja
+  REGISTRADO --> VALIDADO : administración
+  REGISTRADO --> RECHAZADO : con motivo
+  REGISTRADO --> ANULADO : con motivo
+  VALIDADO --> ANULADO : con motivo
+  ANULADO --> [*] : no se reactiva
+</pre>
+    </div>
+    <div class="diagram state">
+      <h3>Comprobante y SUNAT</h3>
+      <p><code>estado_comprobante</code> y <code>estado_sunat</code> · inmutable tras emitir</p>
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --> EMITIDO
+  EMITIDO --> ANULADO : con motivo
+  state SUNAT {
+    [*] --> PENDIENTE
+    PENDIENTE --> ENVIADO
+    ENVIADO --> ACEPTADO
+    ENVIADO --> OBSERVADO
+    ENVIADO --> RECHAZADO
+    ACEPTADO --> BAJA : comunicación de baja
+  }
+</pre>
+    </div>
+  </div>
+</section>
+
+<!-- PENDIENTES -->
+<section class="proc" id="pendientes">
+  <div class="proc-head">
+    <div class="step">Por decidir</div>
+    <h2>Lo que la base de datos todavía no resuelve</h2>
+    <p>Estos puntos salen de leer los triggers: la base de datos no los hace sola, así que la API o una decisión del negocio tiene que cubrirlos.</p>
+  </div>
+  <div class="gaps">
+    <div class="g"><h3>Las cotizaciones no se guardan</h3><p>No hay tabla de cotizaciones. Si quieren historial o seguimiento de prospectos, falta una tabla tipo <code>ven_cotizacion</code>.</p></div>
+    <div class="g"><h3>Pasar a CANCELADA no es automático</h3><p>Ningún trigger cambia la venta cuando se paga todo. La API debe revisar <code>saldo = 0</code> en <code>v_venta_resumen</code>, ya sea al validar el último pago o con una acción manual.</p></div>
+    <div class="g"><h3>Anular una venta no anula sus cuotas</h3><p>El trigger libera la unidad, pero las cuotas pendientes siguen igual. La API debe pasarlas a ANULADA en la misma transacción.</p></div>
+    <div class="g"><h3>El job de cuotas vencidas no está programado</h3><p><code>fn_marcar_cuotas_vencidas()</code> existe, pero alguien tiene que llamarla cada día: <code>@nestjs/schedule</code> o <code>pg_cron</code>.</p></div>
+    <div class="g"><h3>El envío a SUNAT es externo</h3><p>La base de datos guarda el estado y los archivos, pero el XML, la firma y el envío los hace la API con un OSE o proveedor de facturación.</p></div>
+    <div class="g"><h3>¿Quién calcula la mora?</h3><p>Existe <code>monto_mora</code> en la cuota, pero ningún trigger la calcula. Hay que definir la regla (porcentaje diario, monto fijo) y dónde vive.</p></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap">Basado en <code>database/esquema</code>, <code>database/negocio</code> y <code>database/vistas</code>. Los endpoints marcados como propuestos siguen la arquitectura del proyecto (<code>docs/ARQUITECTURA.md</code>).</footer>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+  const oscuro = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  mermaid.initialize({ startOnLoad: true, theme: oscuro ? 'dark' : 'default', securityLevel: 'loose' });
+</script>
+</body>
+</html>

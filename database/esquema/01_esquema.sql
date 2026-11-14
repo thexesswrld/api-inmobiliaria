@@ -26,12 +26,15 @@ BEGIN;
 
 -- Actualiza fecha_modificacion en cada UPDATE (se asigna a todas las tablas al final)
 CREATE OR REPLACE FUNCTION fn_set_fecha_modificacion()
-RETURNS trigger AS $$
+RETURNS trigger
+LANGUAGE plpgsql
+SET TIME ZONE 'America/Lima'
+AS $$
 BEGIN
   NEW.fecha_modificacion := now();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 
 -- =====================================================================
