@@ -6,7 +6,7 @@ import { permisosFaltantes } from '../logic/permisos.logic.js';
 
 /**
  * Al arrancar, revisa que cada código de permisos-banderas.ts exista en
- * auth_permiso. Si falta uno, nadie podría usar ese endpoint: mejor saberlo ya.
+ * auth_permiso. Si falta uno, nadie podría usar ese endpoint
  */
 @Injectable()
 export class PermisosVerificadorService implements OnApplicationBootstrap {
