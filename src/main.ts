@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
@@ -21,4 +22,8 @@ async function bootstrap() {
     databaseUrl: config.get('DATABASE_URL', { infer: true }),
   });
 }
-await bootstrap();
+
+bootstrap().catch((e: unknown) => {
+  new Logger('Bootstrap').error(e instanceof Error ? (e.stack ?? e.message) : String(e));
+  process.exit(1);
+});
