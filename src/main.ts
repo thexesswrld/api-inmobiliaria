@@ -3,14 +3,17 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import { mostrarResumenArranque } from './config/arranque.js';
-import type { Env } from './config/env.js';
+import { swaggerHabilitado, type Env } from './config/env.js';
 import { configurarSwagger } from './config/swagger.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get<ConfigService<Env, true>>(ConfigService);
 
-  const swagger = process.env.NODE_ENV !== 'production';
+  const swagger = swaggerHabilitado({
+    NODE_ENV: config.get('NODE_ENV', { infer: true }),
+    SWAGGER_HABILITADO: config.get('SWAGGER_HABILITADO', { infer: true }),
+  });
   if (swagger) configurarSwagger(app);
 
   const puerto = config.get('PORT', { infer: true });

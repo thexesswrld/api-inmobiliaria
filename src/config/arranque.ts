@@ -27,7 +27,7 @@ export async function mostrarResumenArranque(
 
   log.log('-------------------------------------------');
   log.log(`API iniciada en: ${base}`);
-  log.log(`Swagger docs en: ${opciones.swagger ? `${base}/docs` : 'desactivado (NODE_ENV=production)'}`);
+  log.log(`Swagger docs en: ${opciones.swagger ? `${base}/docs` : 'desactivado (activa con SWAGGER_HABILITADO=true)'}`);
 
   try {
     await app.get(PrismaService).$queryRaw`SELECT 1`;
