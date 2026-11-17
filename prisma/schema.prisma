@@ -7,8 +7,8 @@
 //      npx prisma generate    (regenera el cliente en src/generated)
 //  No usar `prisma migrate dev`: no conoce los triggers ni las funciones.
 //
-//  Por ahora solo están los modelos de autenticación. `db pull` agrega
-//  el resto y conserva los nombres puestos con @map / @@map.
+//  Los nombres de los modelos y campos son los "limpios" del código y se
+//  conservan con @map / @@map. `db pull` mantiene esos nombres.
 // =====================================================================
 
 generator client {
@@ -21,6 +21,183 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// =====================================================================
+//  GENERALES (gen_)
+// =====================================================================
+
+model Lista {
+  id                    Int       @id @default(autoincrement())
+  codigo                String    @unique @db.VarChar(50)
+  nombre                String    @db.VarChar(100)
+  descripcion           String?   @db.VarChar(255)
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  opciones OpcionLista[]
+
+  @@map("gen_listas")
+}
+
+model OpcionLista {
+  id                    Int       @id @default(autoincrement())
+  idLista               Int       @map("id_lista")
+  codigo                String    @db.VarChar(50)
+  nombre                String    @db.VarChar(100)
+  codigoExterno         String?   @map("codigo_externo") @db.VarChar(10)
+  orden                 Int       @default(0) @db.SmallInt
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  lista Lista @relation(fields: [idLista], references: [id])
+
+  // Una lista de opciones se usa en muchas columnas: cada relación lleva nombre.
+  personasTipoPersona      Persona[] @relation("PersonaTipoPersona")
+  personasTipoDocumento    Persona[] @relation("PersonaTipoDocumento")
+  trabajadoresRol          Trabajador[] @relation("TrabajadorRol")
+  proyectosTipoProyecto    Proyecto[] @relation("ProyectoTipoProyecto")
+  sectoresTipoSector       Sector[] @relation("SectorTipoSector")
+  unidadesTipoUnidad       Unidad[] @relation("UnidadTipoUnidad")
+  unidadesEstadoComercial  Unidad[] @relation("UnidadEstadoComercial")
+  modelosTipoModelo        Modelo[] @relation("ModeloTipoModelo")
+  cuentasBancariasMoneda   CuentaBancaria[] @relation("CuentaBancariaMoneda")
+  ventasMoneda             Venta[] @relation("VentaMoneda")
+  ventasEstadoComercial    Venta[] @relation("VentaEstadoComercial")
+  cuotasTipoCuota          Cuota[] @relation("CuotaTipoCuota")
+  cuotasEstadoCuota        Cuota[] @relation("CuotaEstadoCuota")
+  pagosMoneda              Pago[] @relation("PagoMoneda")
+  pagosMedioPago           Pago[] @relation("PagoMedioPago")
+  pagosEstadoPago          Pago[] @relation("PagoEstadoPago")
+  aplicacionesAplicaA      PagoAplicacion[] @relation("PagoAplicacionAplicaA")
+  seriesTipoComprobante    Serie[] @relation("SerieTipoComprobante")
+  comprobantesTipo         Comprobante[] @relation("ComprobanteTipoComprobante")
+  comprobantesMoneda       Comprobante[] @relation("ComprobanteMoneda")
+  comprobantesEstado       Comprobante[] @relation("ComprobanteEstado")
+  comprobantesEstadoSunat  Comprobante[] @relation("ComprobanteEstadoSunat")
+
+  @@unique([idLista, codigo], map: "uq_opcion_lista_codigo")
+  @@map("gen_listas_de_opciones")
+}
+
+model Pais {
+  id                    Int       @id @default(autoincrement())
+  nombre                String    @unique @db.VarChar(100)
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  departamentos Departamento[]
+
+  @@map("gen_pais")
+}
+
+model Departamento {
+  id                    Int       @id @default(autoincrement())
+  idPais                Int       @map("id_pais")
+  nombre                String    @db.VarChar(100)
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  pais       Pais        @relation(fields: [idPais], references: [id])
+  provincias Provincia[]
+
+  @@unique([id, idPais], map: "uq_departamento_pais")
+  @@map("gen_departamento")
+}
+
+model Provincia {
+  id                    Int       @id @default(autoincrement())
+  idDepartamento        Int       @map("id_departamento")
+  nombre                String    @db.VarChar(100)
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  departamento Departamento @relation(fields: [idDepartamento], references: [id])
+  distritos    Distrito[]
+
+  @@unique([id, idDepartamento], map: "uq_provincia_departamento")
+  @@map("gen_provincia")
+}
+
+model Distrito {
+  id                    Int       @id @default(autoincrement())
+  idProvincia           Int       @map("id_provincia")
+  nombre                String    @db.VarChar(100)
+  ubigeo                String?   @unique @db.Char(6)
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  provincia Provincia @relation(fields: [idProvincia], references: [id])
+
+  @@unique([id, idProvincia], map: "uq_distrito_provincia")
+  @@map("gen_distrito")
+}
+
+model Empresa {
+  id                    Int       @id @default(autoincrement())
+  nombre                String    @db.VarChar(200)
+  ruc                   String    @unique @db.Char(11)
+  direccion             String?   @db.VarChar(255)
+  logo                  String?   @db.VarChar(500)
+  idPais                Int?      @map("id_pais")
+  idDepartamento        Int?      @map("id_departamento")
+  idProvincia           Int?      @map("id_provincia")
+  idDistrito            Int?      @map("id_distrito")
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  proyectos Proyecto[]
+  cuentas   CuentaBancaria[]
+  series    Serie[]
+
+  @@map("gen_empresa")
+}
+
+model CuentaBancaria {
+  id                    Int       @id @default(autoincrement())
+  idEmpresa             Int       @map("id_empresa")
+  banco                 String    @db.VarChar(100)
+  tipoMoneda            Int       @map("tipo_moneda")
+  numeroCuenta          String    @map("numero_cuenta") @db.VarChar(30)
+  cci                   String?   @db.Char(20)
+  descripcion           String?   @db.VarChar(255)
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  empresa Empresa     @relation(fields: [idEmpresa], references: [id])
+  moneda  OpcionLista @relation("CuentaBancariaMoneda", fields: [tipoMoneda], references: [id])
+  pagos   Pago[]
+
+  @@unique([banco, numeroCuenta], map: "uq_cuenta_bancaria")
+  @@map("gen_cuenta_bancaria")
+}
+
+// =====================================================================
+//  PERSONAS (per_)
+// =====================================================================
 
 model Persona {
   id                    Int       @id @default(autoincrement())
@@ -43,11 +220,394 @@ model Persona {
   fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
   fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
 
-  usuario Usuario?
+  tipoPersonaOpcion   OpcionLista @relation("PersonaTipoPersona", fields: [tipoPersona], references: [id])
+  tipoDocumentoOpcion OpcionLista @relation("PersonaTipoDocumento", fields: [tipoDocumento], references: [id])
+  usuario             Usuario?
+  cliente             Cliente?
+  trabajador          Trabajador?
 
   @@unique([tipoDocumento, documento], map: "uq_persona_documento")
   @@map("per_persona")
 }
+
+model Trabajador {
+  id                    Int       @id @default(autoincrement())
+  idPersona             Int       @unique @map("id_persona")
+  rolNegocio            Int       @map("rol_negocio")
+  fechaNacimiento       DateTime? @map("fecha_nacimiento") @db.Date
+  fechaIngreso          DateTime? @map("fecha_ingreso") @db.Date
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  persona          Persona     @relation(fields: [idPersona], references: [id])
+  rolNegocioOpcion OpcionLista @relation("TrabajadorRol", fields: [rolNegocio], references: [id])
+  ventas           Venta[]
+
+  @@map("per_trabajador")
+}
+
+model Cliente {
+  id                    Int       @id @default(autoincrement())
+  idPersona             Int       @unique @map("id_persona")
+  profesion             String?   @db.VarChar(100)
+  sueldo                Decimal?  @db.Decimal(14, 2)
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  persona             Persona   @relation(fields: [idPersona], references: [id])
+  ventas              Venta[]
+  unidadesPropietario Unidad[]  @relation("UnidadPropietario")
+  comprobantes        Comprobante[]
+
+  @@map("per_cliente")
+}
+
+// =====================================================================
+//  PROYECTOS (pro_)
+// =====================================================================
+
+model Proyecto {
+  id                    Int       @id @default(autoincrement())
+  idEmpresa             Int       @map("id_empresa")
+  nombre                String    @db.VarChar(200)
+  tipoProyecto          Int       @map("tipo_proyecto")
+  direccion             String?   @db.VarChar(255)
+  logo                  String?   @db.VarChar(500)
+  idPais                Int?      @map("id_pais")
+  idDepartamento        Int?      @map("id_departamento")
+  idProvincia           Int?      @map("id_provincia")
+  idDistrito            Int?      @map("id_distrito")
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  empresa            Empresa     @relation(fields: [idEmpresa], references: [id])
+  tipoProyectoOpcion OpcionLista @relation("ProyectoTipoProyecto", fields: [tipoProyecto], references: [id])
+  sectores           Sector[]
+  modelos            Modelo[]
+
+  @@map("pro_proyecto")
+}
+
+model Sector {
+  id                    Int       @id @default(autoincrement())
+  idProyecto            Int       @map("id_proyecto")
+  idSectorPadre         Int?      @map("id_sector_padre")
+  nombre                String    @db.VarChar(100)
+  codigo                String?   @db.VarChar(30)
+  orden                 Int       @default(0)
+  tipoSector            Int       @map("tipo_sector")
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  proyecto         Proyecto     @relation(fields: [idProyecto], references: [id])
+  padre            Sector?      @relation("SectorPadre", fields: [idSectorPadre], references: [id])
+  hijos            Sector[]     @relation("SectorPadre")
+  tipoSectorOpcion OpcionLista @relation("SectorTipoSector", fields: [tipoSector], references: [id])
+  unidades         Unidad[]
+  modelos          Modelo[]
+  referencias      ModeloReferencia[]
+
+  @@unique([idProyecto, codigo], map: "uq_sector_codigo")
+  @@unique([id, idProyecto], map: "uq_sector_proyecto")
+  @@map("pro_sector")
+}
+
+model Unidad {
+  id                    Int       @id @default(autoincrement())
+  idSector              Int       @map("id_sector")
+  nombre                String    @db.VarChar(100)
+  tipoUnidad            Int       @map("tipo_unidad")
+  precio                Decimal?  @db.Decimal(14, 2)
+  areaProyectada        Decimal?  @map("area_proyectada") @db.Decimal(12, 2)
+  areaSuperficie        Decimal?  @map("area_superficie") @db.Decimal(12, 2)
+  estadoComercial       Int       @map("estado_comercial")
+  idPropietario         Int?      @map("id_propietario")
+  atributos             Json      @default("{}")
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  sector                 Sector       @relation(fields: [idSector], references: [id])
+  tipoUnidadOpcion       OpcionLista  @relation("UnidadTipoUnidad", fields: [tipoUnidad], references: [id])
+  estadoComercialOpcion  OpcionLista  @relation("UnidadEstadoComercial", fields: [estadoComercial], references: [id])
+  propietario            Cliente?     @relation("UnidadPropietario", fields: [idPropietario], references: [id])
+  modelos                Modelo[]
+  referencias            ModeloReferencia[]
+  detalles               DetalleVenta[]
+
+  @@unique([idSector, nombre], map: "uq_unidad_nombre")
+  @@map("pro_unidad")
+}
+
+model Modelo {
+  id                    Int       @id @default(autoincrement())
+  idProyecto            Int       @map("id_proyecto")
+  idSector              Int?      @map("id_sector")
+  idUnidad              Int?      @map("id_unidad")
+  tipoModelo            Int       @map("tipo_modelo")
+  nombre                String    @db.VarChar(150)
+  ruta                  String    @db.VarChar(500)
+  version               Int       @default(1)
+  esPrincipal           Boolean   @default(false) @map("es_principal")
+  orden                 Int       @default(0)
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  proyecto         Proyecto     @relation(fields: [idProyecto], references: [id])
+  sector           Sector?      @relation(fields: [idSector], references: [id])
+  unidad           Unidad?      @relation(fields: [idUnidad], references: [id])
+  tipoModeloOpcion OpcionLista @relation("ModeloTipoModelo", fields: [tipoModelo], references: [id])
+  referencias      ModeloReferencia[]
+
+  @@map("pro_modelo")
+}
+
+model ModeloReferencia {
+  id                    Int       @id @default(autoincrement())
+  idModelo              Int       @map("id_modelo")
+  idSector              Int?      @map("id_sector")
+  idUnidad              Int?      @map("id_unidad")
+  geometria             Json?
+  idElementoExterno     String?   @map("id_elemento_externo") @db.VarChar(100)
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  modelo Modelo  @relation(fields: [idModelo], references: [id])
+  sector Sector? @relation(fields: [idSector], references: [id])
+  unidad Unidad? @relation(fields: [idUnidad], references: [id])
+
+  @@map("pro_modelo_referencia")
+}
+
+// =====================================================================
+//  COMERCIAL (ven_)
+// =====================================================================
+
+model Venta {
+  id                    Int       @id @default(autoincrement())
+  codigo                String    @unique @db.VarChar(30)
+  idCliente             Int       @map("id_cliente")
+  idTrabajador          Int       @map("id_trabajador")
+  fechaVenta            DateTime  @map("fecha_venta") @db.Date
+  tipoMoneda            Int       @map("tipo_moneda")
+  montoBruto            Decimal   @default(0) @map("monto_bruto") @db.Decimal(14, 2)
+  descuento             Decimal   @default(0) @db.Decimal(14, 2)
+  montoFinal            Decimal   @default(0) @map("monto_final") @db.Decimal(14, 2)
+  montoInicial          Decimal   @default(0) @map("monto_inicial") @db.Decimal(14, 2)
+  montoFinanciado       Decimal   @default(0) @map("monto_financiado") @db.Decimal(14, 2)
+  numeroCuotas          Int       @default(0) @map("numero_cuotas")
+  fechaFinVenta         DateTime? @map("fecha_fin_venta") @db.Date
+  estadoComercial       Int       @map("estado_comercial")
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  cliente               Cliente     @relation(fields: [idCliente], references: [id])
+  trabajador            Trabajador  @relation(fields: [idTrabajador], references: [id])
+  moneda                OpcionLista @relation("VentaMoneda", fields: [tipoMoneda], references: [id])
+  estadoComercialOpcion OpcionLista @relation("VentaEstadoComercial", fields: [estadoComercial], references: [id])
+  detalles              DetalleVenta[]
+  cuotas                Cuota[]
+  pagos                 Pago[]
+
+  @@map("ven_venta")
+}
+
+model DetalleVenta {
+  id                    Int       @id @default(autoincrement())
+  idVenta               Int       @map("id_venta")
+  idUnidad              Int       @map("id_unidad")
+  precioLista           Decimal   @map("precio_lista") @db.Decimal(14, 2)
+  descuento             Decimal   @default(0) @db.Decimal(14, 2)
+  precioVenta           Decimal   @map("precio_venta") @db.Decimal(14, 2)
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  venta  Venta  @relation(fields: [idVenta], references: [id])
+  unidad Unidad @relation(fields: [idUnidad], references: [id])
+
+  @@unique([idVenta, idUnidad], map: "uq_detalle_venta_unidad")
+  @@map("ven_detalle_venta")
+}
+
+model Cuota {
+  id                    Int       @id @default(autoincrement())
+  idVenta               Int       @map("id_venta")
+  numero                Int
+  tipoCuota             Int       @map("tipo_cuota")
+  fechaVencimiento      DateTime  @map("fecha_vencimiento") @db.Date
+  monto                 Decimal   @db.Decimal(14, 2)
+  montoPagado           Decimal   @default(0) @map("monto_pagado") @db.Decimal(14, 2)
+  montoMora             Decimal   @default(0) @map("monto_mora") @db.Decimal(14, 2)
+  montoMoraPagado       Decimal   @default(0) @map("monto_mora_pagado") @db.Decimal(14, 2)
+  estadoCuota           Int       @map("estado_cuota")
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  venta            Venta        @relation(fields: [idVenta], references: [id])
+  tipoCuotaOpcion  OpcionLista  @relation("CuotaTipoCuota", fields: [tipoCuota], references: [id])
+  estadoCuotaOpcion OpcionLista @relation("CuotaEstadoCuota", fields: [estadoCuota], references: [id])
+  aplicaciones     PagoAplicacion[]
+
+  @@unique([idVenta, numero], map: "uq_cuota_numero")
+  @@unique([id, idVenta], map: "uq_cuota_venta")
+  @@map("ven_cuota")
+}
+
+model Pago {
+  id                    Int       @id @default(autoincrement())
+  idVenta               Int       @map("id_venta")
+  fechaPago             DateTime  @map("fecha_pago") @db.Date
+  monto                 Decimal   @db.Decimal(14, 2)
+  tipoMoneda            Int       @map("tipo_moneda")
+  tipoCambio            Decimal?  @map("tipo_cambio") @db.Decimal(10, 4)
+  medioPago             Int       @map("medio_pago")
+  idCuentaBancaria      Int?      @map("id_cuenta_bancaria")
+  numeroOperacion       String?   @map("numero_operacion") @db.VarChar(50)
+  ruta                  String?   @db.VarChar(500)
+  estadoPago            Int       @map("estado_pago")
+  motivoAnulacion       String?   @map("motivo_anulacion") @db.VarChar(500)
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  venta          Venta            @relation(fields: [idVenta], references: [id])
+  moneda         OpcionLista      @relation("PagoMoneda", fields: [tipoMoneda], references: [id])
+  medioPagoOpcion OpcionLista     @relation("PagoMedioPago", fields: [medioPago], references: [id])
+  estadoPagoOpcion OpcionLista    @relation("PagoEstadoPago", fields: [estadoPago], references: [id])
+  cuentaBancaria CuentaBancaria?  @relation(fields: [idCuentaBancaria], references: [id])
+  aplicaciones   PagoAplicacion[]
+  comprobantes   Comprobante[]
+
+  @@unique([id, idVenta], map: "uq_pago_venta")
+  @@map("ven_pago")
+}
+
+model PagoAplicacion {
+  id                    Int       @id @default(autoincrement())
+  idPago                Int       @map("id_pago")
+  idVenta               Int       @map("id_venta")
+  idCuota               Int       @map("id_cuota")
+  montoAplicado         Decimal   @map("monto_aplicado") @db.Decimal(14, 2)
+  aplicaA               Int       @map("aplica_a")
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  pago        Pago        @relation(fields: [idPago], references: [id])
+  cuota       Cuota       @relation(fields: [idCuota, idVenta], references: [id, idVenta])
+  aplicaAOpcion OpcionLista @relation("PagoAplicacionAplicaA", fields: [aplicaA], references: [id])
+
+  @@map("ven_pago_aplicacion")
+}
+
+model Serie {
+  id                    Int       @id @default(autoincrement())
+  idEmpresa             Int       @map("id_empresa")
+  tipoComprobante       Int       @map("tipo_comprobante")
+  serie                 String    @db.Char(4)
+  ultimoNumero          Int       @default(0) @map("ultimo_numero")
+  estado                Int       @default(1) @db.SmallInt
+  idUsuarioCreacion     Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion Int?      @map("id_usuario_modificacion")
+  fechaCreacion         DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion     DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  empresa              Empresa     @relation(fields: [idEmpresa], references: [id])
+  tipoComprobanteOpcion OpcionLista @relation("SerieTipoComprobante", fields: [tipoComprobante], references: [id])
+
+  @@unique([idEmpresa, tipoComprobante, serie], map: "uq_serie")
+  @@unique([id, tipoComprobante, serie], map: "uq_serie_tipo_texto")
+  @@map("ven_serie")
+}
+
+model Comprobante {
+  id                       Int       @id @default(autoincrement())
+  idSerie                  Int       @map("id_serie")
+  tipoComprobante          Int       @map("tipo_comprobante")
+  serie                    String    @db.Char(4)
+  numero                   Int
+  fechaEmision             DateTime  @map("fecha_emision") @db.Date
+  idPago                   Int?      @map("id_pago")
+  idCliente                Int       @map("id_cliente")
+  clienteTipoDocumento     String    @map("cliente_tipo_documento") @db.VarChar(2)
+  clienteNumeroDocumento   String    @map("cliente_numero_documento") @db.VarChar(20)
+  clienteRazonSocial       String    @map("cliente_razon_social") @db.VarChar(200)
+  clienteDireccion         String?   @map("cliente_direccion") @db.VarChar(255)
+  tipoMoneda               Int       @map("tipo_moneda")
+  tipoCambio               Decimal?  @map("tipo_cambio") @db.Decimal(10, 4)
+  opGravada                Decimal   @default(0) @map("op_gravada") @db.Decimal(14, 2)
+  opExonerada              Decimal   @default(0) @map("op_exonerada") @db.Decimal(14, 2)
+  opInafecta               Decimal   @default(0) @map("op_inafecta") @db.Decimal(14, 2)
+  porcentajeIgv            Decimal   @default(18) @map("porcentaje_igv") @db.Decimal(5, 2)
+  igv                      Decimal   @default(0) @db.Decimal(14, 2)
+  total                    Decimal   @db.Decimal(14, 2)
+  idComprobanteReferencia  Int?      @map("id_comprobante_referencia")
+  glosa                    String?   @db.VarChar(500)
+  observaciones            String?   @db.VarChar(500)
+  estadoComprobante        Int       @map("estado_comprobante")
+  motivoAnulacion          String?   @map("motivo_anulacion") @db.VarChar(500)
+  estadoSunat              Int       @map("estado_sunat")
+  hashCpe                  String?   @map("hash_cpe") @db.VarChar(100)
+  urlPdf                   String?   @map("url_pdf") @db.VarChar(500)
+  urlXml                   String?   @map("url_xml") @db.VarChar(500)
+  urlCdr                   String?   @map("url_cdr") @db.VarChar(500)
+  fechaEnvioSunat          DateTime? @map("fecha_envio_sunat") @db.Timestamptz(6)
+  mensajeSunat             String?   @map("mensaje_sunat") @db.VarChar(1000)
+  estado                   Int       @default(1) @db.SmallInt
+  idUsuarioCreacion        Int?      @map("id_usuario_creacion")
+  idUsuarioModificacion    Int?      @map("id_usuario_modificacion")
+  fechaCreacion            DateTime  @default(now()) @map("fecha_creacion") @db.Timestamptz(6)
+  fechaModificacion        DateTime? @map("fecha_modificacion") @db.Timestamptz(6)
+
+  pago                  Pago?        @relation(fields: [idPago], references: [id])
+  cliente               Cliente      @relation(fields: [idCliente], references: [id])
+  tipoComprobanteOpcion OpcionLista  @relation("ComprobanteTipoComprobante", fields: [tipoComprobante], references: [id])
+  moneda                OpcionLista  @relation("ComprobanteMoneda", fields: [tipoMoneda], references: [id])
+  estadoOpcion          OpcionLista  @relation("ComprobanteEstado", fields: [estadoComprobante], references: [id])
+  estadoSunatOpcion     OpcionLista  @relation("ComprobanteEstadoSunat", fields: [estadoSunat], references: [id])
+  referencia            Comprobante? @relation("ComprobanteReferencia", fields: [idComprobanteReferencia], references: [id])
+  notas                 Comprobante[] @relation("ComprobanteReferencia")
+
+  @@unique([idSerie, numero], map: "uq_comprobante_numero")
+  @@map("ven_comprobante")
+}
+
+// =====================================================================
+//  AUTENTICACIÓN (auth_)
+// =====================================================================
 
 model Usuario {
   id                    Int       @id @default(autoincrement())

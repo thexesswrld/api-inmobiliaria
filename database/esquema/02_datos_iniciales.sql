@@ -142,9 +142,45 @@ VALUES ('ADMIN', 'Administrador', 'Acceso total al sistema');
 
 -- Permisos. Cada código debe coincidir con src/common/auth/permisos-banderas.ts
 -- (la API avisa al arrancar si falta alguno). Formato: modulo.entidad.accion
+-- ON CONFLICT: este bloque se puede volver a ejecutar en una base existente
+-- para agregar los permisos nuevos sin duplicar los anteriores.
 INSERT INTO auth_permiso (codigo, nombre, modulo) VALUES
-  ('auth.usuario.listar', 'Listar usuarios',      'auth'),
-  ('auth.usuario.ver',    'Ver detalle de usuario', 'auth');
+  -- auth
+  ('auth.usuario.listar',        'Listar usuarios',                    'auth'),
+  ('auth.usuario.ver',           'Ver detalle de usuario',             'auth'),
+  -- proyectos
+  ('pro.proyecto.listar',        'Listar proyectos',                   'pro'),
+  ('pro.proyecto.ver',           'Ver proyecto',                       'pro'),
+  ('pro.sector.listar',          'Listar sectores del proyecto',       'pro'),
+  ('pro.modelo.listar',          'Listar modelos y planos',            'pro'),
+  ('pro.unidad.listar',          'Listar unidades',                    'pro'),
+  ('pro.unidad.ver',             'Ver unidad',                         'pro'),
+  ('pro.unidad.bloquear',        'Bloquear o liberar unidad',          'pro'),
+  -- cotizaciones
+  ('ven.cotizacion.simular',     'Simular cotización',                 'ven'),
+  -- ventas
+  ('ven.venta.listar',           'Listar ventas',                      'ven'),
+  ('ven.venta.ver',              'Ver venta',                          'ven'),
+  ('ven.venta.separar',          'Separar unidad / crear venta',       'ven'),
+  ('ven.venta.formalizar',       'Formalizar contrato',                'ven'),
+  ('ven.venta.cerrar',           'Cancelar o entregar venta',          'ven'),
+  ('ven.venta.anular',           'Anular o resolver venta',            'ven'),
+  -- cuotas
+  ('ven.cuota.listar',           'Listar cuotas',                      'ven'),
+  ('ven.cuota.marcar-vencidas',  'Ejecutar el marcado de vencidas',    'ven'),
+  -- pagos
+  ('ven.pago.listar',            'Listar pagos',                       'ven'),
+  ('ven.pago.ver',               'Ver pago',                           'ven'),
+  ('ven.pago.registrar',         'Registrar pago',                     'ven'),
+  ('ven.pago.validar',           'Validar pago',                       'ven'),
+  ('ven.pago.anular',            'Rechazar o anular pago',             'ven'),
+  -- comprobantes
+  ('ven.comprobante.listar',     'Listar comprobantes',                'ven'),
+  ('ven.comprobante.ver',        'Ver comprobante',                    'ven'),
+  ('ven.comprobante.emitir',     'Emitir comprobante',                 'ven'),
+  ('ven.comprobante.anular',     'Anular comprobante',                 'ven'),
+  ('ven.comprobante.sunat',      'Actualizar estado SUNAT',            'ven')
+ON CONFLICT (codigo) DO NOTHING;
 
 -- ADMIN recibe todos los permisos (se puede volver a ejecutar sin duplicar)
 INSERT INTO auth_rol_permiso (id_rol, id_permiso)

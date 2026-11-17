@@ -3,8 +3,14 @@ import { Paginado } from '../respuesta/respuesta.types.js';
 
 /** Query string estándar de los listados: ?pagina=1&porPagina=20 */
 export const PaginacionSchema = z.object({
-  pagina: z.coerce.number().int().min(1).default(1),
-  porPagina: z.coerce.number().int().min(1).max(100).default(20),
+  pagina: z.coerce.number().int().min(1).default(1).describe('Número de página, empieza en 1'),
+  porPagina: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .default(20)
+    .describe('Registros por página (máximo 100)'),
 });
 
 export type PaginacionQuery = z.infer<typeof PaginacionSchema>;

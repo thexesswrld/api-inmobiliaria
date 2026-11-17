@@ -177,7 +177,7 @@ html { scroll-behavior: smooth; }
   <p>Cada proceso muestra quién lo inicia, qué endpoint llama, qué hace la transacción en la base de datos, qué triggers se disparan y qué estados cambian. Las reglas y los mensajes de error salen de <code>database/negocio/</code>.</p>
   <div class="legend">
     <span><span class="tag-bd">BD</span> ya existe en la base de datos (tabla, trigger o función)</span>
-    <span><span class="tag-prop">propuesto</span> endpoint sugerido, aún no implementado en la API</span>
+    <span><span class="tag-prop">implementado</span> endpoint disponible en la API</span>
   </div>
 </header>
 
@@ -265,7 +265,7 @@ sequenceDiagram
       <dl>
         <div class="row"><dt>Actores</dt><dd>Cliente, Asesor de ventas</dd></div>
         <div class="row"><dt>Endpoints</dt><dd class="ep">
-          <div><span class="verb get">GET</span><span class="path">/proyectos</span> <span class="tag-prop">propuesto</span></div>
+          <div><span class="verb get">GET</span><span class="path">/proyectos</span> <span class="tag-prop">implementado</span></div>
           <div><span class="verb get">GET</span><span class="path">/proyectos/:id/sectores</span></div>
           <div><span class="verb get">GET</span><span class="path">/unidades?estado=DISPONIBLE</span></div>
           <div><span class="verb get">GET</span><span class="path">/proyectos/:id/modelos</span></div>
@@ -321,7 +321,7 @@ sequenceDiagram
       <dl>
         <div class="row"><dt>Actores</dt><dd>Asesor de ventas (registra), Cliente</dd></div>
         <div class="row"><dt>Endpoint</dt><dd class="ep">
-          <div><span class="verb post">POST</span><span class="path">/ventas</span> <span class="tag-prop">propuesto</span></div>
+          <div><span class="verb post">POST</span><span class="path">/ventas</span> <span class="tag-prop">implementado</span></div>
         </dd></div>
         <div class="row"><dt>Permiso</dt><dd><code>ven.venta.separar</code></dd></div>
         <div class="row"><dt>Escribe</dt><dd><code>ven_venta</code>, <code>ven_detalle_venta</code>, <code>ven_cuota</code></dd></div>
@@ -382,7 +382,7 @@ sequenceDiagram
       <dl>
         <div class="row"><dt>Actores</dt><dd>Caja o Cobranzas, Cliente</dd></div>
         <div class="row"><dt>Endpoint</dt><dd class="ep">
-          <div><span class="verb post">POST</span><span class="path">/ventas/:id/pagos</span> <span class="tag-prop">propuesto</span></div>
+          <div><span class="verb post">POST</span><span class="path">/ventas/:id/pagos</span> <span class="tag-prop">implementado</span></div>
         </dd></div>
         <div class="row"><dt>Permiso</dt><dd><code>ven.pago.registrar</code></dd></div>
         <div class="row"><dt>Escribe</dt><dd><code>ven_pago</code>, <code>ven_pago_aplicacion</code>. <code>ven_cuota</code> la actualiza el trigger</dd></div>
@@ -438,7 +438,7 @@ sequenceDiagram
       <dl>
         <div class="row"><dt>Actores</dt><dd>Administración</dd></div>
         <div class="row"><dt>Endpoint</dt><dd class="ep">
-          <div><span class="verb patch">PATCH</span><span class="path">/pagos/:id/estado</span> <span class="tag-prop">propuesto</span></div>
+          <div><span class="verb patch">PATCH</span><span class="path">/pagos/:id/estado</span> <span class="tag-prop">implementado</span></div>
         </dd></div>
         <div class="row"><dt>Permisos</dt><dd><code>ven.pago.validar</code>, <code>ven.pago.anular</code></dd></div>
         <div class="row"><dt>Escribe</dt><dd><code>ven_pago</code>. Las cuotas las recalcula el trigger</dd></div>
@@ -495,7 +495,7 @@ sequenceDiagram
       <dl>
         <div class="row"><dt>Actores</dt><dd>Administración, SUNAT u OSE</dd></div>
         <div class="row"><dt>Endpoints</dt><dd class="ep">
-          <div><span class="verb post">POST</span><span class="path">/pagos/:id/comprobante</span> <span class="tag-prop">propuesto</span></div>
+          <div><span class="verb post">POST</span><span class="path">/pagos/:id/comprobante</span> <span class="tag-prop">implementado</span></div>
           <div><span class="verb patch">PATCH</span><span class="path">/comprobantes/:id/anular</span></div>
           <div><span class="verb fn">FN</span><span class="path">fn_siguiente_numero_comprobante</span> <span class="tag-bd">BD</span></div>
         </dd></div>
@@ -555,7 +555,7 @@ sequenceDiagram
       <dl>
         <div class="row"><dt>Actores</dt><dd>Jefe de ventas, Cliente</dd></div>
         <div class="row"><dt>Endpoint</dt><dd class="ep">
-          <div><span class="verb patch">PATCH</span><span class="path">/ventas/:id/formalizar</span> <span class="tag-prop">propuesto</span></div>
+          <div><span class="verb patch">PATCH</span><span class="path">/ventas/:id/formalizar</span> <span class="tag-prop">implementado</span></div>
         </dd></div>
         <div class="row"><dt>Permiso</dt><dd><code>ven.venta.formalizar</code></dd></div>
         <div class="row"><dt>Escribe</dt><dd><code>ven_venta</code>, <code>ven_cuota</code>. <code>pro_unidad</code> la actualiza el trigger</dd></div>
@@ -614,7 +614,7 @@ sequenceDiagram
       <dl>
         <div class="row"><dt>Actores</dt><dd>Administración, Gerencia</dd></div>
         <div class="row"><dt>Endpoint</dt><dd class="ep">
-          <div><span class="verb patch">PATCH</span><span class="path">/ventas/:id/estado</span> <span class="tag-prop">propuesto</span></div>
+          <div><span class="verb patch">PATCH</span><span class="path">/ventas/:id/estado</span> <span class="tag-prop">implementado</span></div>
         </dd></div>
         <div class="row"><dt>Permisos</dt><dd><code>ven.venta.cerrar</code>, <code>ven.venta.anular</code></dd></div>
         <div class="row"><dt>Lee</dt><dd><span class="tag-bd">BD</span> <code>v_venta_resumen</code> (saldo, total_pagado)</dd></div>
@@ -669,7 +669,7 @@ sequenceDiagram
         <div class="row"><dt>Disparo</dt><dd><code>@nestjs/schedule</code> con un cron diario, o <code>pg_cron</code> en Supabase</dd></div>
         <div class="row"><dt>Función</dt><dd class="ep">
           <div><span class="verb fn">FN</span><span class="path">fn_marcar_cuotas_vencidas()</span> <span class="tag-bd">BD</span></div>
-          <div><span class="verb get">GET</span><span class="path">/cuotas?estado=VENCIDA</span> <span class="tag-prop">propuesto</span></div>
+          <div><span class="verb get">GET</span><span class="path">/cuotas?estado=VENCIDA</span> <span class="tag-prop">implementado</span></div>
         </dd></div>
         <div class="row"><dt>Permiso</dt><dd><code>ven.cuota.listar</code></dd></div>
         <div class="row"><dt>Estados</dt><dd class="flow">
